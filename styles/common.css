@@ -1,0 +1,95 @@
+:root {
+  --red-color: #ac3d39;
+  --red-color-10: #bf443f;
+  --red-color-20: #c65652;
+  --red-color-30: #cc6965;
+  --red-color-40: #d27c79;
+  --red-color-50: #d98e8c;
+  --red-color-60: #dfa19f;
+  --red-color-70: #e5b4b2;
+  --red-color-80: #ecc7c5;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
+  grid-gap: 10px;
+}
+
+span {
+  height: 7px;
+  width: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-bottom: 2px;
+  margin-right: 7px;
+}
+
+input[type="text"]{
+  height: 30px;
+    border-radius: 25px;
+    outline: none;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    padding-left: 12px;
+    width: 65%;
+}
+
+input[type="button"]{
+  width: 25%;
+  height: 30px;
+  background-color: #3590ed;
+  border-radius: 25px;
+  color: #fff;
+  outline: none;
+  border: none;
+}
+
+.wrap{
+  display: flex;
+  justify-content: space-between;
+}
+
+    
+.dot-feature {
+  background-color: #19abf1;
+}
+
+.dot-bug {
+  background-color: #ff7272;
+}
+
+.dot-request {
+  background-color: #28cfb0;
+}
+
+.featuretext-head {
+  color: #19abf1;
+}
+.bugtext-head {
+  color: #ff7272;
+}
+
+.request-text-head {
+  color: #28cfb0;
+}
+
+.card {
+  border: 1px solid rgb(154 160 185 / 5%);
+  height: auto;
+  padding: 5px;
+  border-radius: 4px;
+  box-shadow: 0 5px 4px rgb(154 160 185 / 5%),
+    0 15px 40px rgb(166 173 201 / 20%);
+  margin: 5px;
+}
+
+.add{
+  text-align: center;
+  font-size: 22px;
+  font-weight: bolder;
+  cursor: pointer;
+}
+
+.cardheadsuccess {
+}
