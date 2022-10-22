@@ -1,16 +1,31 @@
-import React, { useState } from "react";
-import Card from "../common/Card";
+import React, { useState, useEffect } from "react";
 import "../../styles/common.css";
+import CardComponent from "../cardComponent/CardComponent";
 
 const Board = () => {
+  const getUsers = () => {
+    const data = localStorage.getItem("lanes");
+
+    if (data) {
+      return JSON.parse(data);
+    } else {
+      return [];
+    }
+  };
+
   const [showForm, setShowForm] = useState(false);
   const [laneTitle, setLaneTitle] = useState("");
-  const [lane, setLane] = useState([]);
   const [error, setError] = useState("");
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [task, setTask] = useState({});
-  const [taskDetails, setTaskDetails] = useState([]);
   const [laneId, setLaneId] = useState("");
+  const [lns, setLns] = useState([]);
+  const [lnsDummy, setLnsDummy] = useState(getUsers());
+  const [taskCreated, setTaskCreated] = useState(false);
+
+  useEffect(() => {
+    setLns(getUsers());
+  }, []);
 
   const handleLane = () => {
     setShowForm(true);
@@ -20,19 +35,20 @@ const Board = () => {
     setLaneTitle(e.target.value);
   };
   const handleCreate = () => {
-    let uniqueTitle = lane && lane.some((it) => it.title == laneTitle);
+    setShowCreateTask(false);
+    setShowForm(false);
+    let uniqueTitle =
+      lns && lns.some((it) => Object.keys(it).toString() == laneTitle);
     if (!uniqueTitle) {
-      let newData = { title: laneTitle, id: laneTitle };
-      let existingLanes = [...lane];
-      existingLanes.push(newData);
-      setLane(existingLanes);
+      let existingLanes = [...lns];
+      existingLanes.push({ [laneTitle]: [] });
+      setLns(existingLanes);
       setLaneTitle("");
       setError("");
     } else {
       setError("Lane already Exists");
       setLaneTitle("");
     }
-    setShowCreateTask(false);
   };
 
   const addTask = (e) => {
@@ -48,144 +64,170 @@ const Board = () => {
     }));
   };
 
-  const handleCreateTask = (title) => {
-    // let existingTasks = [...taskDetails];
-    // existingTasks.push(task);
-    // setTaskDetails(existingTasks);
-    // console.log(existingTasks);
-
-    // if(taskDetails.some(item => item.hasOwnProperty(lane))){
-    //   existingTasks= [...taskDetails]
-    // }
-    //  let array=[];
-    //     array[lane]=[task];
-    //     console.log(array);
-
-    // let arr = [];
-    // if (taskDetails.length > 0) {
-    //   arr[lane] = [taskDetails[lane]];
-    //   arr[lane].push(task);
-    //   console.log("if", arr);
-    // } else {
-    //   arr[lane] = [...taskDetails];
-    //   arr[lane].push(task);
-    //   console.log("else", arr);
-    // }
-
-    let oldArr = [...taskDetails];
-
-    lane.map((name) => {
-      if (name.id == title) {
-        if (oldArr.length > 0) {
-          // oldArr=oldArr[title];
-          var a = oldArr.filter((itx) => {
-            return itx[title] && itx;
-            //  if(itx[title]){
-            //   return itx[title].push(task)
-            //  }else{
-            //   return oldArr.push({[title]:[task]})
-            //  }
-          });
-          console.log("createeeee", a);
-          if(a.length==0){
-            oldArr.push({ [title]: [task] });
-          }else{
-            oldArr[title].push(task)
-          }
-          console.log("createeeeeold", oldArr);
-        } else {
-          oldArr.push({ [title]: [task] });
-        }
-
-        setTaskDetails(oldArr);
-        // console.log(oldArr,"createeeee",oldArr);
-      }
-      // console.log("create",arr);
+  const handleCreateTasks = (title) => {
+    lns.map((item) => {
+      if (Object.keys(item).toString() == title[0])
+        return item[title].push(task);
     });
+    setTask({});
+    setShowCreateTask(false);
+    setLns(lns);
+    setTaskCreated(!taskCreated);
+    localStorage.setItem("lanes", JSON.stringify(lns));
   };
+
+  const handleDelete = (id, keyName) => {
+    let oldAr = lnsDummy;
+    let name = keyName.toString();
+    oldAr.map((itx, index) => {
+      if (Object.keys(itx).toString() == keyName.toString()) {
+        delete itx[name][id];
+        itx[name] = itx[name].filter((ig) => ig != null);
+        return itx[name];
+      }
+    });
+    setLns(oldAr);
+    setTaskCreated(!taskCreated);
+    localStorage.setItem("lanes", JSON.stringify(lns));
+  };
+  const deleteLane = (lane) => {
+    let exis = lnsDummy;
+    exis = exis.filter((hj) => Object.keys(hj).toString() != lane);
+    setLns(exis);
+    setTaskCreated(!taskCreated);
+    localStorage.setItem("lanes", JSON.stringify(lns));
+  };
+
+  useEffect(() => {
+    setLnsDummy(lns);
+  }, [taskCreated, lns]);
+
+  useEffect(() => {
+    localStorage.setItem("lanes", JSON.stringify(lnsDummy));
+  }, [lnsDummy]);
+
   return (
     <>
       <div className="container">
-        {/* <div>
-          <div>To do list</div>
-          <Card headingClass="featuretext-head" dotClass="dot-feature" />
-        </div>
-        <div>
-          <div>To do list</div>
-          <Card headingClass="bugtext-head" dotClass="dot-bug" />
-        </div>
-        <div>
-          <div>To do list</div>
-          <Card headingClass="request-text-head" dotClass="dot-request" />
-        </div>
-        <div>
-          <div>To do list</div>
-          <Card />
-        </div> */}
-        {lane &&
-          lane.map((item, index) => {
-            return (
-              <div key={index}>
-                <div> {item.title}</div>
-                {showCreateTask && laneId == item.title ? (
-                  <div>
-                    <input
-                      type="text"
-                      placeholder="Title"
-                      name="title"
+        {lnsDummy.map((itx, index) => (
+          <>
+            <div key={index}>
+              <div className="card-header">
+                <div className="title">{Object.keys(itx).toString()}</div>
+                <div
+                  className="close"
+                  onClick={() => deleteLane(Object.keys(itx).toString())}
+                >
+                  X
+                </div>
+              </div>
+              {Object.values(itx) && (
+                <CardComponent
+                  data={Object.values(itx)}
+                  delete={handleDelete}
+                  keyName={Object.keys(itx)}
+                />
+              )}
+              {showCreateTask && laneId == Object.keys(itx).toString() ? (
+                <>
+                  <div className="margin">
+                    <label>
+                      <b>Title</b>
+                    </label>
+                    <div className="margin">
+                      <input
+                        type="text"
+                        placeholder="Eg.Task "
+                        name="title"
+                        onChange={handleChangeTask}
+                      />
+                    </div>
+                    <label>
+                      <b>Description</b>
+                    </label>
+                    <div className="margin">
+                      <input
+                        type="text"
+                        placeholder="Eg.Status Update..."
+                        name="description"
+                        onChange={handleChangeTask}
+                      />
+                    </div>
+                  </div>
+                  <div className="margin">
+                    <label>
+                      <b>Type</b>
+                    </label>
+                  </div>
+                  <div className="selectWrapper margin">
+                    <select
+                      className="selectBox"
+                      name="type"
+                      id="option"
+                      placeholder="Type"
                       onChange={handleChangeTask}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Description"
-                      name="description"
-                      onChange={handleChangeTask}
-                    />
-                    <select name="type" id="option" onChange={handleChangeTask}>
+                    >
+                      <option value="" disabled selected>
+                        Select Type
+                      </option>
                       <option value="feature">Feature</option>
-                      <option value="report">Report</option>
+                      <option value="request">Request</option>
                       <option value="bug">Bug</option>
                     </select>
-                    <input
-                      type="button"
-                      // disabled={laneTitle.length == 0}
-                      value="Create"
-                      onClick={() => handleCreateTask(item.title)}
-                    />
                   </div>
-                ) : (
-                  <div className="card add" onClick={() => addTask(item.title)}>
-                    {" "}
-                    Add Items
+                  <div className="btn">
+                     <input
+                        type="button"
+                        className={
+                          Object.values(task).length == 3 ? "" : "disable"
+                        }
+                        disabled={Object.values(task).length != 3}
+                        value="Create"
+                        onClick={() => handleCreateTasks(Object.keys(itx))}
+                      />
                   </div>
-                )}
-                {/* <Card /> */}
-              </div>
-            );
-          })}
+                </>
+              ) : (
+                <div
+                  className="card add"
+                  onClick={() => addTask(Object.keys(itx).toString())}
+                >
+                  Add Tasks
+                </div>
+              )}
+            </div>
+          </>
+        ))}
         <div>
-          Create Lane
+          <h3>Create Lane</h3>
           {showForm ? (
-            <div className="wrap card">
+            <div className="card">
+              <label>
+                <b>Lanetitle</b>
+              </label>
               <input
+                className="margin"
                 type="text"
                 onChange={handleChange}
-                placeholder="Lanetitle"
+                placeholder="Eg. To-Do-List"
                 value={laneTitle}
               />
-              <input
-                type="button"
-                disabled={laneTitle.length == 0}
-                value="ADD"
-                onClick={handleCreate}
-              />
+              <div className="btn margin">
+                <input
+                  type="button"
+                  className={laneTitle.length == 0 ? "disable" : ""}
+                  disabled={laneTitle.length == 0}
+                  value="ADD"
+                  onClick={handleCreate}
+                />
+              </div>
             </div>
           ) : (
             <div onClick={handleLane} className="card add">
               +
             </div>
           )}
-          {error && <p>{error}</p>}
+          {error && <p className="error">{error}</p>}
         </div>
       </div>
     </>
